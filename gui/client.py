@@ -1,8 +1,5 @@
 # Import Module
 from tkinter import *
-import pickle
-import socket
-import threading
 import sys
 sys.path.append('../')  # Assuming RSAEncryption is in the parent directory
 from CPS2.utils.RSA import RSAEncryption 
@@ -12,22 +9,9 @@ import sys
 sys.path.append('../')
 from CPS2.utils.AES import *
 
-HOST = 'localhost'
-PORT = 5432
-serverPK=""
- 
-# จากข้อ 1 : สร้าง socket object
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
- 
-# จากข้อ 4 : client ทำการเชื่อมต่อไปยัง server
-s.connect((HOST, PORT))
 PUs=""
- 
 root = Tk()
-
-# root window title and dimension
 root.title("Server")
-# Set geometry(widthxheight)
 root.geometry('350x200')
 root.resizable(False, False)
 
@@ -45,7 +29,7 @@ def sendEncryptedData(message):
     byte_data = pickle.dumps(x+"|"+EncyptedData+"|"+EncyptedSSSK)
     print(byte_data)
     # s.sendall(byte_data)
-def clickedConnect():
+def clickedKeyExchange():
     PUs, PRs = RSAEncryption().generate_keys()
     s.sendall(f"PK,{public_key[0]},{public_key[1]}".encode())
     sendEncryptedData("Tintin")
