@@ -4,6 +4,8 @@ from CPS2.utils.RSA import RSAEncryption
 from CPS2.utils.AES import *
 import secrets
 import hashlib
+from tkinter import *
+
 class User:
     RSA=RSAEncryption()
     def __init__(self,System):
@@ -12,6 +14,10 @@ class User:
         self.System=System
         self.count = 0
         self.available=120
+        self.root = Tk()
+        self.root.title("Server")
+        self.root.geometry('350x200')
+        self.root.resizable(False, False)
     def __generateSSSK(self):
         return secrets.token_hex(256)
     def keyExchange(self,other):
