@@ -1,23 +1,29 @@
 import sys
 sys.path.append('../')
+from tkinter import *
 from CPS2.utils.RSA import RSAEncryption 
 from CPS2.utils.AES import *
 import secrets
 import hashlib
-from tkinter import *
+import streamlit as st
 
-class User:
+class Server:
     RSA=RSAEncryption()
-    def __init__(self,System):
+    def __init__(self):
         self.PU , self.__PR= self.RSA.generate_keys()
         self.PUOuther=""
-        self.System=System
-        self.count = 0
+        self.count= 0
         self.available=120
         self.root = Tk()
         self.root.title("Server")
         self.root.geometry('350x200')
         self.root.resizable(False, False)
+        self.v= StringVar(self.root)
+        self.statusLbl=Label(self.root, textvariable=self.v,bg="red",padx=13)
+        self.statusLbl.pack(side=TOP,expand=True)
+        self.statusLbl1=Label(self.root, text=self.available,bg="green",padx=13)
+        self.statusLbl1.pack(side=TOP,expand=True)
+        
     def __generateSSSK(self):
         return secrets.token_hex(256)
     def keyExchange(self,other):
@@ -49,26 +55,23 @@ class User:
         sssk = sssk.encode("utf-8")  # Encode the string back to bytes
         message_encode = aes_decrypt(sssk, ciphertext, nonce).decode()
         verify= hashlib.sha256(message_encode.encode()).hexdigest()==RSAEncryption().decrypt( hash_SHA1_m_PRs, self.PUOuther)
-        if (verify and self.System=="Server"):
-            if message_encode =="IN":
+        if message_encode == "IN":
+            if (self.count<= self.available):
                 self.count+=1
-                print(self.count)
-            elif message_encode =="OUT":
+                print(self.count) 
+                self.v.set(str(self.count))  # Update with current count
+                self.statusLbl.update()
+
+        elif message_encode == "OUT":
+            if (self.count>0):
                 self.count-=1
+                print(self.count)
+                self.v.set(str(self.count))  # Update with current count
+                self.statusLbl.update()
+
+
 
 
 
         
-#1 USER    
-Tintin=User("Client")
-Pin=User("Server")
 
-#2 KEY EXCHANGE
-Tintin.keyExchange(Pin)
-
-#3 KEY EXCHANGE
-print(Tintin.PU)
-print(Pin.PUOuther)
-
-Tintin.payloadSend("IN",Pin)
-Tintin.payloadSend("IN",Pin)
