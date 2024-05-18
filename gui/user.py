@@ -6,9 +6,12 @@ import secrets
 import hashlib
 class User:
     RSA=RSAEncryption()
-    def __init__(self):
+    def __init__(self,System):
         self.PU , self.__PR= self.RSA.generate_keys()
         self.PUOuther=""
+        self.System=System
+        self.count = 0
+        self.available=120
     def __generateSSSK(self):
         return secrets.token_hex(256)
     def keyExchange(self,other):
@@ -16,14 +19,10 @@ class User:
         other.PUOuther=self.PU
     def __payloadCreated(self,message):
         sssk=key_generation()
-        print(type(sssk))
-        print(f"SSK ORIGIN {sssk}")
         message_encode = message.encode()
         ciphertext, nonce = aes_encrypt(sssk, message_encode) #1
-
         hash_SHA1_m = hashlib.sha256(message.encode()).hexdigest()
         hash_SHA1_m_PRs=RSAEncryption().encrypt(hash_SHA1_m, self.__PR ) #2
-
         SSSK_Pu=RSAEncryption().encrypt(str(sssk.decode("utf-8")), self.PUOuther ) #3
         return {
             "ciphertext": ciphertext,
@@ -42,24 +41,26 @@ class User:
         SSSK_Pu=payload["SSSK_Pu"]
         sssk = RSAEncryption().decrypt(SSSK_Pu, self.__PR)
         sssk = sssk.encode("utf-8")  # Encode the string back to bytes
-
-        print(sssk)
         message_encode = aes_decrypt(sssk, ciphertext, nonce).decode()
-        print(message_encode)
         verify= hashlib.sha256(message_encode.encode()).hexdigest()==RSAEncryption().decrypt( hash_SHA1_m_PRs, self.PUOuther)
-        print(verify)
-        
+        if (verify and self.System=="Server"):
+            if message_encode =="IN":
+                self.count+=1
+                print(self.count)
+            elif message_encode =="OUT":
+                self.count-=1
+    
 
         
 #1 USER    
-Tintin=User()
-Pin=User()
+Tintin=User("Client")
+Pin=User("Server")
 
 #2 KEY EXCHANGE
 Tintin.keyExchange(Pin)
 
-
+#3 KEY EXCHANGE
 print(Tintin.PU)
 print(Pin.PUOuther)
-
-Tintin.payloadSend("Hi",Pin)
+Tintin.payloadSend("IN",Pin)
+Tintin.payloadSend("IN",Pin)
