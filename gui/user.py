@@ -8,16 +8,9 @@ from tkinter import *
 
 class User:
     RSA=RSAEncryption()
-    def __init__(self,System):
+    def __init__(self):
         self.PU , self.__PR= self.RSA.generate_keys()
         self.PUOuther=""
-        self.System=System
-        self.count = 0
-        self.available=120
-        self.root = Tk()
-        self.root.title("Server")
-        self.root.geometry('350x200')
-        self.root.resizable(False, False)
     def __generateSSSK(self):
         return secrets.token_hex(256)
     def keyExchange(self,other):
@@ -49,26 +42,11 @@ class User:
         sssk = sssk.encode("utf-8")  # Encode the string back to bytes
         message_encode = aes_decrypt(sssk, ciphertext, nonce).decode()
         verify= hashlib.sha256(message_encode.encode()).hexdigest()==RSAEncryption().decrypt( hash_SHA1_m_PRs, self.PUOuther)
-        if (verify and self.System=="Server"):
-            if message_encode =="IN":
-                self.count+=1
-                print(self.count)
-            elif message_encode =="OUT":
-                self.count-=1
+        if (verify):
+            print(f"Verify PASS M:{message_encode}")
+        else:
+            print("Error, you didn't have the right to access this.")
 
 
 
         
-#1 USER    
-Tintin=User("Client")
-Pin=User("Server")
-
-#2 KEY EXCHANGE
-Tintin.keyExchange(Pin)
-
-#3 KEY EXCHANGE
-print(Tintin.PU)
-print(Pin.PUOuther)
-
-Tintin.payloadSend("IN",Pin)
-Tintin.payloadSend("IN",Pin)

@@ -6,6 +6,7 @@ import secrets
 import hashlib
 from tkinter import *
 
+
 class Client:
     RSA=RSAEncryption()
     def __init__(self):
@@ -41,6 +42,10 @@ class Client:
         hash_SHA1_m = hashlib.sha256(message.encode()).hexdigest()
         hash_SHA1_m_PRs=RSAEncryption().encrypt(hash_SHA1_m, self.__PR ) #2
         SSSK_Pu=RSAEncryption().encrypt(str(sssk.decode("utf-8")), self.PUOuther ) #3
+        print(f"""     ciphertext: {ciphertext},
+            nonce: {nonce},
+            hash_SHA1_m_PRs: {hash_SHA1_m_PRs},
+            SSSK_Pu": {SSSK_Pu}"""  )
         return {
             "ciphertext": ciphertext,
             "nonce": nonce,

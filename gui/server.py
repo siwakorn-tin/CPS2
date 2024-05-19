@@ -36,6 +36,10 @@ class Server:
         hash_SHA1_m = hashlib.sha256(message.encode()).hexdigest()
         hash_SHA1_m_PRs=RSAEncryption().encrypt(hash_SHA1_m, self.__PR ) #2
         SSSK_Pu=RSAEncryption().encrypt(str(sssk.decode("utf-8")), self.PUOuther ) #3
+        print(f"""     ciphertext: {ciphertext},
+            nonce: {nonce},
+            hash_SHA1_m_PRs: {hash_SHA1_m_PRs},
+            SSSK_Pu": {SSSK_Pu}"""  )
         return {
             "ciphertext": ciphertext,
             "nonce": nonce,
@@ -55,19 +59,22 @@ class Server:
         sssk = sssk.encode("utf-8")  # Encode the string back to bytes
         message_encode = aes_decrypt(sssk, ciphertext, nonce).decode()
         verify= hashlib.sha256(message_encode.encode()).hexdigest()==RSAEncryption().decrypt( hash_SHA1_m_PRs, self.PUOuther)
-        if message_encode == "IN":
-            if (self.count<= self.available):
-                self.count+=1
-                print(self.count) 
-                self.v.set(str(self.count))  # Update with current count
-                self.statusLbl.update()
+        if verify:
+            if message_encode == "IN":
+                if (self.count<= self.available):
+                    self.count+=1
+                    print(self.count) 
+                    self.v.set(str(self.count))  # Update with current count
+                    self.statusLbl.update()
 
-        elif message_encode == "OUT":
-            if (self.count>0):
-                self.count-=1
-                print(self.count)
-                self.v.set(str(self.count))  # Update with current count
-                self.statusLbl.update()
+            elif message_encode == "OUT":
+                if (self.count>0):
+                    self.count-=1
+                    print(self.count)
+                    self.v.set(str(self.count))  # Update with current count
+                    self.statusLbl.update()
+        else:
+            print("Your permission is denied.")
 
 
 
